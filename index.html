@@ -1,17 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dynamic To-Do List</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>To-Do List</h1>
-        <input type="text" id="task-input" placeholder="Enter a task">
-        <button id="add-task-btn">Add Task</button>
-        <ul id="task-list"></ul>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+document.addEventListener('DOMContentLoaded', () => {
+    const addButton = document.getElementById('add-task-btn');
+    const taskInput = document.getElementById('task-input');
+    const taskList = document.getElementById('task-list');
+
+    function loadTasks() {
+        const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        storedTasks.forEach(taskText => addTask(taskText, false));
+    }
+
+    function saveTasks() {
+        const tasks = [];
+        const listItems = taskList.querySelectorAll('li');
+        listItems.forEach(li => {
+            tasks.push(li.firstChild.textContent);
+        });
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function addTask(taskText, save = true) {
+        if (!taskText) {
+            taskText = taskInput.value.trim();
+        }
+
+        if (taskText === '') {
+            alert('Please enter a task.');
+            return;
+        }
+
+        const li = document.createElement('li');
+        li.textContent = taskText;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
+        removeBtn.classList.add('remove-btn');
+        removeBtn.onclick = () => {
+            taskList.removeChild(li);
+            saveTasks();
+        };
+
+        li.appendChild(removeBtn);
+        taskList.appendChild(li);
+
+        if (save) {
+            saveTasks();
+        }
+
+        taskInput.value = '';
+    }
+
+    addButton.addEventListener('click', () => addTask());
+
+    taskInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            addTask();
+        }
+    });
+
+    loadTasks();
+});
+
